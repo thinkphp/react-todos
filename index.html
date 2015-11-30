@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>React-ToDos</title>
+<style>
+body{  font-family: 'Titillium Web', 'Arial', sans-serif;}
+
+input#create {
+  width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 10px 30px;
+  border-left:    1px  solid #c9c;
+  border-right:   1px  solid #c9c;
+  border-bottom:  2px  solid #c9c;
+  border-top:     15px solid #c9c;
+  text-align: center;
+}
+
+#create::-webkit-input-placeholder {
+  color: #C3C3C4;
+  text-align: center;
+}
+
+#create::-moz-placeholder {  /* Firefox 19+ */
+   color: #C3C3C4;
+   text-align: center;
+}
+
+#create:focus::-webkit-input-placeholder {
+  color: transparent;
+  text-align: center;
+}
+
+#create:focus::-moz-placeholder {  /* Firefox 19+ */
+   color: transparent;
+   text-align: center;
+}
+
+
+#container {
+  width: 600px;
+  font-family: 'Titillium Web', 'Arial', sans-serif;
+  font-size: 40px;
+  text-align: center;
+  margin: 40px auto;
+}
+
+#list {
+  width: 600px;
+  font-family: 'Titillium Web', 'Arial', sans-serif;
+  font-size: 40px;
+  text-align: center;
+  margin: 40px auto;
+}
+
+.item {
+  position: relative;
+  box-sizing: border-box;
+  padding: 10px;
+  list-style-type: none;
+  width: 100%;
+
+}
+
+.complete-button {
+margin-right: 20px
+}
+.delete-button {
+margin-left: 20px;
+font-size: 15px
+}
+
+.item.completed {
+  color: #C3C3C4;
+  text-decoration: line-through;
+}
+  </style>
+
+</head>
+<body>
+<center><h1 style="color: #c9c">React-TODOS</h1></center>
+  <div id="container"></div>
+  <div id="list"></div>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="https://fb.me/react-with-addons-0.14.3.min.js"></script>
+  <script src="vendor/JSXTransformer.js"></script>  
+  <script src="js/store.js" type="text/jsx"></script>
+  <script type="text/jsx">
+
+ var CreationForm = React.createClass({
+
+      render: function() {
+
+        return (
+
+          <form id="add-form" onSubmit={this.handleSubmit}>
+
+            <input id='create' ref="task" type='text' placeholder='Add Something to the list!' />
+
+          </form>
+        )
+      },
+
+      handleSubmit: function(event) {
+
+             event.preventDefault()
+
+             var task = this.refs.task.getDOMNode().value
+
+             $("#create").val("")
+
+             ListStore.addItem( task ) 
+      }
+    })
+
+
+var Item = React.createClass({
+
+      render: function() {
+
+        var itemClass = this.props.completed ? 'item completed' : 'item'
+
+        return (
+
+          <li className={itemClass}>            
+            <div className='description'>
+            <span className='complete-button' onClick={this.handleComplete}><input type="checkbox" /></span>
+            {this.props.description}
+            <span className='delete-button'><button onClick={this.removeItem} type="button" class="btn btn-primary">delete</button></span>
+            </div>
+            
+          </li>
+        )
+      },
+
+      handleComplete: function() {
+  
+            ListStore.toggleCompleteness(this.props.id);
+      },
+
+      removeItem: function() {
+
+            ListStore.deleteItem(this.props.id);
+      }
+  })
+
+    
+var List = React.createClass({
+
+    getInitialState: function() {
+
+       return (
+
+               {items: []}
+       )
+    },
+
+    componentWillMount: function() {
+
+        $(ListStore).on('storeHasChanged', function() {
+
+                     this.setState({ items: ListStore.getItems() })
+
+        }.bind(this))
+    },
+
+    render: function() {
+
+        var itemComponents = this.state.items.map(function(itemData) {
+
+                 return <Item key={'item-' + itemData.id} {...itemData}/>
+        })
+
+        return (
+
+          <ul id='list'>
+
+            {itemComponents}
+
+          </ul>
+        )
+    }   
+})
+  
+
+
+      React.render(<CreationForm />, document.getElementById('container')) 
+      React.render(<List />, document.getElementById('list')) 
+      ListStore.loadItems()
+  </script>
+
+</body>
+</html>
